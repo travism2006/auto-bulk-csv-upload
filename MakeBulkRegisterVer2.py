@@ -2,7 +2,6 @@
     Makes a CSV for bulk uploading and registering recipients to
     take in the HCP and Employer Portals.
 
-
        Sample Row Data for Recipients
                                        
 Travis103,Mit,tmitchumEY+i23@gmail.com
@@ -19,7 +18,7 @@ import FileConstants
 
 # REGION START Functions--------------------------------------------------
 # Updates max values
-def updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue):
+def updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue, charUpdateValue):
     with open("data last wrote.csv", 'w', newline='') as dataFile:
         dataWriter = csv.writer(dataFile)
         
@@ -29,7 +28,7 @@ def updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue):
         dataWriter.writerow(["Last File Value", fileUpdateValue-1])
         dataWriter.writerow(["Last First Name Value", firstNameUpdateValue])
         dataWriter.writerow(["Last Email Value", emailUpdateValue])
-        dataWriter.writerow(["Last Char Value", emailUpdateValue])
+        dataWriter.writerow(["Last Char Value", charUpdateValue])
 
 # Reads max values
 def readDataFile():
@@ -43,9 +42,6 @@ def readDataFile():
     return toUnpackList
 # REGION ENDS-------------------------------------------------------------
 
-
-emailCharList = ['q']
-
 # handling y/n input
 validMap = {'y':True, 'Y':True, 'yes': True, 'Yes': True,
         'n':False, 'N':False, 'no':False, 'No':False}
@@ -56,24 +52,28 @@ willReset = shouldReset[0]
 
 firstName = input("First Name: ")
 lastName = input("Last Name: ")
+preGmail = input("Your Gmail account: ")
 
 lastWroteList = readDataFile()
 
 fileUpdateValue = int(lastWroteList[0])
 firstNameUpdateValue = int(lastWroteList[1])
 emailUpdateValue = int(lastWroteList[2])
+emailCharStr = str(lastWroteList[3])
+
+emailCharList = [c for c in emailCharStr]
+
 
 # if you said 'Y' to reset then values will go back to 1 and future emails will still be unique
 if willReset:
-    emailCharList.append(emailCharList[0])
+    emailCharList.append(list(emailCharStr)[0])
     print(firstNameUpdateValue, ' is now reset to 1')
-##    print(emailUpdateValue, ' is now reset to 1')
     firstNameUpdateValue = 1
     emailUpdateValue = 1
 
 
 
-with open("BULK upload this.csv", 'w', newline='') as csvfile:
+with open("test many Q.csv", 'w', newline='') as csvfile:
     csvWriter = csv.writer(csvfile)
     csvWriter.writerow(FileConstants.HEADER)
 
@@ -85,7 +85,7 @@ with open("BULK upload this.csv", 'w', newline='') as csvfile:
         firstNameField = firstName + str(firstNameUpdateValue)
         lastNameField = lastName + str(firstNameUpdateValue)
         emailCharSeq = "".join(emailCharList)
-        emailField = FileConstants.BASE_GMAIL + "+" + emailCharSeq + str(emailUpdateValue) + "@gmail.com"
+        emailField = preGmail + "+" + emailCharSeq + str(emailUpdateValue) + "@gmail.com"
 
         #wrap fields in row and write data to csv
         row = [firstNameField, lastNameField, emailField]
@@ -94,7 +94,8 @@ with open("BULK upload this.csv", 'w', newline='') as csvfile:
         #update row values here
         emailUpdateValue += 1
         firstNameUpdateValue += 1
+        charUpdateValue = emailCharSeq
 
     fileUpdateValue += 1
-    updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue)
+    updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue, charUpdateValue)
     
