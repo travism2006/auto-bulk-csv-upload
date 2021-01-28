@@ -1,16 +1,13 @@
 """
     Makes a CSV for bulk uploading and registering recipients to
-    take in the Healthcare Provider (HCP) Portal.
+    take in the HCP and Employer Portals.
+
+       Sample Row Data for Recipients
+                                       
+Travis103,Mit,tmitchumEY+i23@gmail.com
+Travis104,Mit,tmitchumEY+i24@gmail.com
+Travis105,Mit,tmitchumEY+i25@gmail.com
 """
-
-
-
-
-#       Sample Row Data for Recipients
-#                                       High/Low, Employee/Individual
-#Travis103,Mit,tmitchumEY+i23@gmail.com,High,Employee
-#Travis104,Mit,tmitchumEY+i24@gmail.com,High,Employee
-#Travis105,Mit,tmitchumEY+i25@gmail.com,High,Employee
 
 import csv
 import fnmatch
@@ -21,7 +18,7 @@ import FileConstants
 
 # REGION START Functions--------------------------------------------------
 # Updates max values
-def updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue):
+def updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue, charUpdateValue):
     with open("data last wrote.csv", 'w', newline='') as dataFile:
         dataWriter = csv.writer(dataFile)
         
@@ -31,7 +28,7 @@ def updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue):
         dataWriter.writerow(["Last File Value", fileUpdateValue-1])
         dataWriter.writerow(["Last First Name Value", firstNameUpdateValue])
         dataWriter.writerow(["Last Email Value", emailUpdateValue])
-
+        dataWriter.writerow(["Last Char Value", charUpdateValue])
 
 # Reads max values
 def readDataFile():
@@ -43,30 +40,41 @@ def readDataFile():
         for row in dataReader:
             if "Last" in row[0]: toUnpackList.append(row[1])
     return toUnpackList
-
 # REGION ENDS-------------------------------------------------------------
 
+# handling y/n input
+validMap = {'y':True, 'Y':True, 'yes': True, 'Yes': True,
+        'n':False, 'N':False, 'no':False, 'No':False}
+askReset = input("Reset values and update email? (y/n): ")
+shouldReset = [val for k,val in validMap.items() if askReset==k]
+willReset = shouldReset[0]
 
-emailChar = "r"
+
 firstName = input("First Name: ")
+lastName = input("Last Name: ")
+preGmail = input("Your Gmail account: ")
 
-
-
-# check what was last written
 lastWroteList = readDataFile()
 
 fileUpdateValue = int(lastWroteList[0])
 firstNameUpdateValue = int(lastWroteList[1])
 emailUpdateValue = int(lastWroteList[2])
+emailCharStr = str(lastWroteList[3])
 
-csvFileName = FileConstants.FILE_BASE_NAME + str(fileUpdateValue) + '.csv'
+emailCharList = [c for c in emailCharStr]
 
-with open(csvFileName, 'w', newline='') as csvfile:
-    # creating a csv writer object 
+
+# if you said 'Y' to reset then values will go back to 1 and future emails will still be unique
+if willReset:
+    emailCharList.append(list(emailCharStr)[0])
+    print(firstNameUpdateValue, ' is now reset to 1')
+    firstNameUpdateValue = 1
+    emailUpdateValue = 1
+
+
+
+with open("test many Q.csv", 'w', newline='') as csvfile:
     csvWriter = csv.writer(csvfile)
-
-
-    #write header string
     csvWriter.writerow(FileConstants.HEADER)
 
 
@@ -74,27 +82,20 @@ with open(csvFileName, 'w', newline='') as csvfile:
     amtOfRows = input("Amt. of new recipients: ")
     
     for i in range(int(amtOfRows)):
-        
-        #build field values
         firstNameField = firstName + str(firstNameUpdateValue)
-        lastNameField = "Monr" + str(firstNameUpdateValue)
-        emailField = FileConstants.BASE_GMAIL + "+" + emailChar + str(emailUpdateValue) + "@gmail.com"
-        #riskLevelField = "High"
-        #personTypeField = "Employee"
-
+        lastNameField = lastName + str(firstNameUpdateValue)
+        emailCharSeq = "".join(emailCharList)
+        emailField = preGmail + "+" + emailCharSeq + str(emailUpdateValue) + "@gmail.com"
 
         #wrap fields in row and write data to csv
         row = [firstNameField, lastNameField, emailField]
         csvWriter.writerow(row)
 
-
         #update row values here
         emailUpdateValue += 1
         firstNameUpdateValue += 1
+        charUpdateValue = emailCharSeq
 
-    
     fileUpdateValue += 1
-    updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue)
-        
+    updateDataFile(fileUpdateValue, firstNameUpdateValue, emailUpdateValue, charUpdateValue)
     
-
