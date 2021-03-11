@@ -65,7 +65,7 @@ lastWroteList = readDataFile()
 #fileUpdateValue = int(lastWroteList[0])
 firstNameUpdateValue = 1
 emailUpdateValue = 1
-emailCharStr = 'q'
+emailCharStr = 'r4r'
 emailCharList = [c for c in emailCharStr]
 
 updateRows = []
